@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nodeutils
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-init
+  namespace: nodeutils
+spec:
+  selector:
+    matchLabels:
+      job: node-init
+  template:
+    metadata:
+      labels:
+        job: node-init
+    spec:
+      hostPID: true
+      restartPolicy: Always
+      containers:
+      - image: nav13n/node-init:0.0.1
+        name: node-init
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: node-init-script
+          mountPath: /tmp
+        - name: host-mount
+          mountPath: /host
+      volumes:
+      - name: node-init-script
+        configMap:
+          name: node-init-config
+      - name: host-mount
+        hostPath:
+          path: /tmp/install
